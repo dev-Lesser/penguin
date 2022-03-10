@@ -56,5 +56,7 @@ def db_session(engine):
         yield db
     except:
         db.rollback()
+        print('db connection rollback')
     finally:
+        print('db connection closed')
         db.close()

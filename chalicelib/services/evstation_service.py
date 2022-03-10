@@ -5,10 +5,14 @@ recommend_evstation [post] -> 위경도 list 묶음, distance default 10
 """
 
 import json
-
-from chalice import Blueprint, Response
-from chalicelib.schemes.evstation_scheme import EvSearchScheme, EvRecommendScheme, AutoCompleteScheme
-from chalicelib.constants.configs import DEV_CORS_CONFIG, DEV_HEADERS, EVSTATION_COLUMNS
+import os
+from chalice import Blueprint, Response, CORSConfig
+from chalicelib.schemes.evstation_scheme import (
+    EvSearchScheme, 
+    EvRecommendScheme, 
+    AutoCompleteScheme
+)
+from chalicelib.constants.configs import EVSTATION_COLUMNS
 
 from chalicelib.utils.utils import create_response
 from chalicelib.utils.db import db_session, DATABASES
@@ -22,15 +26,28 @@ from chalicelib.errors.not_found_error import not_found_error # 404
 
 evstation_service_route = Blueprint(__name__)
 
+HEADERS = {
+    'Content-Type' : os.environ['CONTENT_TYPE'],
+    'Access-Control-Allow-Origin' : os.environ['Access_Control_Allow_Origin']
+}
+
+CORS_CONFIG = CORSConfig(
+    allow_origin=os.environ['ALLOW_ORIGIN'],
+    allow_credentials=True
+)
+
 # Load schemes
 evsearch_scheme = EvSearchScheme()
 evrecommend_scheme = EvRecommendScheme()
 evsearch_autocomplete_scheme = AutoCompleteScheme()
 
+
+
+
 @evstation_service_route.route(
     path = '/search/evstation', 
     methods = ['POST'],
-    cors = DEV_CORS_CONFIG, 
+    cors = CORS_CONFIG, 
 )
 def search_evstation() -> dict:
     """
@@ -60,14 +77,14 @@ def search_evstation() -> dict:
     )
     return Response(
         body=body,
-        headers=DEV_HEADERS,
+        headers=HEADERS,
         status_code=200
     )
 
 @evstation_service_route.route(
     path = '/station/{stat_id}', 
     methods = ['GET'],
-    cors = DEV_CORS_CONFIG, 
+    cors = CORS_CONFIG, 
 )
 def search_evstation_seq(stat_id: str) -> dict:
     """
@@ -86,7 +103,7 @@ def search_evstation_seq(stat_id: str) -> dict:
     )
     return Response(
         body=body,
-        headers=DEV_HEADERS,
+        headers=HEADERS,
         status_code=200
     )
 
@@ -94,7 +111,7 @@ def search_evstation_seq(stat_id: str) -> dict:
 @evstation_service_route.route(
     path = '/station/recommend', 
     methods = ['POST'],
-    cors = DEV_CORS_CONFIG, 
+    cors = CORS_CONFIG, 
 )
 def recommend_evstation() -> dict:
     """
@@ -124,28 +141,28 @@ def recommend_evstation() -> dict:
     
     return Response(
         body=body,
-        headers=DEV_HEADERS,
+        headers=HEADERS,
         status_code=200
     )
 
 @evstation_service_route.route(
     path = '/evstation/filter', 
     methods = ['GET'],
-    cors = DEV_CORS_CONFIG, 
+    cors = CORS_CONFIG, 
 )
 def get_search_filter() -> dict:
     with db_session(DATABASES) as db:
         results = get_search_filter_query(db=db)
     return Response(
         body=results,
-        headers=DEV_HEADERS,
+        headers=HEADERS,
         status_code=200
     )
 
 @evstation_service_route.route(
     path = '/search/autocomplete', 
     methods = ['GET'],
-    cors = DEV_CORS_CONFIG, 
+    cors = CORS_CONFIG, 
 )
 def get_autocomplete() -> dict:
     e = evstation_service_route.current_request.to_dict()
@@ -170,6 +187,6 @@ def get_autocomplete() -> dict:
     
     return Response(
         body=body,
-        headers=DEV_HEADERS,
+        headers=HEADERS,
         status_code=200
     )

@@ -1,8 +1,7 @@
 import json
-
-from chalice import Blueprint, Response
+import os
+from chalice import Blueprint, Response, CORSConfig
 from chalicelib.schemes.user_favorite_scheme import UserFavoriteScheme
-from chalicelib.constants.configs import DEV_CORS_CONFIG, DEV_HEADERS
 
 from chalicelib.utils.db import db_session, DATABASES
 
@@ -15,13 +14,24 @@ from chalicelib.errors.not_found_error import not_found_error # 404
 
 user_favorite_route = Blueprint(__name__)
 
+HEADERS = {
+    'Content-Type' : os.environ['CONTENT_TYPE'],
+    'Access-Control-Allow-Origin' : os.environ['Access_Control_Allow_Origin']
+}
+
+CORS_CONFIG = CORSConfig(
+    allow_origin=os.environ['ALLOW_ORIGIN'],
+    allow_credentials=True
+)
+
+
 # Load schemes
 user_fav_scheme = UserFavoriteScheme()
 
 @user_favorite_route.route(
     path = '/search/favorites', 
     methods = ['GET', 'POST', 'DELETE'],
-    cors = DEV_CORS_CONFIG, 
+    cors = CORS_CONFIG, 
 )
 def handle_favorites() -> dict:
     """
@@ -41,7 +51,7 @@ def handle_favorites() -> dict:
             }
             return Response(
                 body=results,
-                headers=DEV_HEADERS,
+                headers=HEADERS,
                 status_code=200
             )
 
@@ -58,7 +68,7 @@ def handle_favorites() -> dict:
             else:
                 return Response(
                     body={'message': 'success', 'stat_id': stat_id, 'id': user_id},
-                    headers=DEV_HEADERS,
+                    headers=HEADERS,
                     status_code=204
                 )
 
@@ -76,7 +86,7 @@ def handle_favorites() -> dict:
             if success:
                 return Response(
                     body={'message': 'success', 'id': user_id, 'stat_id': stat_id },
-                    headers=DEV_HEADERS,
+                    headers=HEADERS,
                     status_code=201
                 )
                 
