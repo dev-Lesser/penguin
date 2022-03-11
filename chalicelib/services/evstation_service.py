@@ -5,14 +5,14 @@ recommend_evstation [post] -> 위경도 list 묶음, distance default 10
 """
 
 import json
-import os
-from chalice import Blueprint, Response, CORSConfig
+
+from chalice import Blueprint, Response
 from chalicelib.schemes.evstation_scheme import (
     EvSearchScheme, 
     EvRecommendScheme, 
     AutoCompleteScheme
 )
-from chalicelib.constants.configs import EVSTATION_COLUMNS
+from chalicelib.constants.configs import EVSTATION_COLUMNS, HEADERS, CORS_CONFIG
 
 from chalicelib.utils.utils import create_response
 from chalicelib.utils.db import db_session, DATABASES
@@ -26,22 +26,10 @@ from chalicelib.errors.not_found_error import not_found_error # 404
 
 evstation_service_route = Blueprint(__name__)
 
-HEADERS = {
-    'Content-Type' : os.environ['CONTENT_TYPE'],
-    'Access-Control-Allow-Origin' : os.environ['Access_Control_Allow_Origin']
-}
-
-CORS_CONFIG = CORSConfig(
-    allow_origin=os.environ['ALLOW_ORIGIN'],
-    allow_credentials=True
-)
-
 # Load schemes
 evsearch_scheme = EvSearchScheme()
 evrecommend_scheme = EvRecommendScheme()
 evsearch_autocomplete_scheme = AutoCompleteScheme()
-
-
 
 
 @evstation_service_route.route(

@@ -19,16 +19,11 @@ DATABASES = 'mysql://%s:%s@%s/%s?charset=utf8' % (
     DB_HOST,
     DB_NAME
 )
-ENGINE = create_engine(
-    DATABASES,
-    encoding="utf-8",
-    echo=True,
-)
 
 BASE = declarative_base()
 
 
-def create_db_engine(db_conn_string, debug_mode=True):
+def create_db_engine(db_conn_string, debug_mode=False):
     return create_engine(
         db_conn_string,
         echo=debug_mode,

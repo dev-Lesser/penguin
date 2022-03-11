@@ -1,6 +1,8 @@
 import json
 import os
-from chalice import Blueprint, Response, CORSConfig
+from chalice import Blueprint, Response
+from chalicelib.constants.configs import HEADERS, CORS_CONFIG
+
 from chalicelib.schemes.user_favorite_scheme import UserFavoriteScheme
 
 from chalicelib.utils.db import db_session, DATABASES
@@ -13,17 +15,6 @@ from chalicelib.errors.not_found_error import not_found_error # 404
 
 
 user_favorite_route = Blueprint(__name__)
-
-HEADERS = {
-    'Content-Type' : os.environ['CONTENT_TYPE'],
-    'Access-Control-Allow-Origin' : os.environ['Access_Control_Allow_Origin']
-}
-
-CORS_CONFIG = CORSConfig(
-    allow_origin=os.environ['ALLOW_ORIGIN'],
-    allow_credentials=True
-)
-
 
 # Load schemes
 user_fav_scheme = UserFavoriteScheme()

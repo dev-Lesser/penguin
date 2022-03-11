@@ -10,11 +10,11 @@ app = Chalice(app_name='penguin')
 # ADD 공간쿼리 blueprint
 app.register_blueprint(evstation_service_route) 
 
-# # login blueprint
-# app.register_blueprint(account_login_service_route) 
+# login blueprint
+app.register_blueprint(account_login_service_route) 
 
-# # user favorite blueprint
-# app.register_blueprint(user_favorite_route) 
+# user favorite blueprint
+app.register_blueprint(user_favorite_route) 
 
 # using firebase  blueprint
 # app.register_blueprint(firebase_route)

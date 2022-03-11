@@ -3,10 +3,10 @@ check_user_info [post] user 자동로그인 처리
 get_user_info [get] user 정보 가져오기
 """
 import json
-import os
 
-from chalice import Blueprint, Response, CORSConfig
+from chalice import Blueprint, Response
 from chalicelib.schemes.account_scheme import UserInfoScheme, GetUserInfoScheme
+from chalicelib.constants.configs import HEADERS, CORS_CONFIG
 
 from chalicelib.utils.db import db_session, DATABASES
 from chalicelib.services.query.account_login_query import *
@@ -20,16 +20,6 @@ account_scheme = UserInfoScheme()
 account_check_scheme = GetUserInfoScheme()
 
 account_login_service_route = Blueprint(__name__)
-
-HEADERS = {
-    'Content-Type' : os.environ['CONTENT_TYPE'],
-    'Access-Control-Allow-Origin' : os.environ['Access_Control_Allow_Origin']
-}
-
-CORS_CONFIG = CORSConfig(
-    allow_origin=os.environ['ALLOW_ORIGIN'],
-    allow_credentials=True
-)
 
 # auto login
 @account_login_service_route.route(

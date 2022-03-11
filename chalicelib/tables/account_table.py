@@ -1,7 +1,6 @@
-from enum import unique
 from sqlalchemy import Column,Integer,String,DateTime
 
-from ..utils.db import BASE, ENGINE
+from ..utils.db import BASE
 
 
 class UserInfoTable(BASE):
