@@ -7,6 +7,8 @@ from chalice import Blueprint
 from chalicelib.utils.db import db_session, DATABASES
 from chalicelib.tables.evstation_status_table import EvStationStatusTable
 
+
+#[TODO] Database update evtable
 service_key = os.environ['EV_SERVICE_KEY']
 url = 'http://apis.data.go.kr/B552584/EvCharger/getChargerInfo'
 zcodes = ['42', '41', '48', '47', '29', '27', '30', '26', '36', '11', '31', '28', '46', '45', '50', '44', '43']
@@ -14,8 +16,10 @@ zcodes = ['42', '41', '48', '47', '29', '27', '30', '26', '36', '11', '31', '28'
 db = db_session(DATABASES)
 data_pipeline_route = Blueprint(__name__)
 
+#[TODO] Code convention
+# Database update station_status
 @data_pipeline_route.schedule('rate(1 hour)')
-def upsert_db():
+def upsert_station_status():
     output = {}
     status_column_names = ['busiId','statId', 'chgerId','stat','statUpdDt','lastTsdt','lastTedt','nowTsdt']
     url = 'http://apis.data.go.kr/B552584/EvCharger/getChargerStatus'

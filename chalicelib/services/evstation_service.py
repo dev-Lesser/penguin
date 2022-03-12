@@ -47,7 +47,7 @@ def search_evstation() -> dict:
         return bad_request_error(errors)
     results = []
     with db_session(DATABASES) as db:
-        data =  search_evstation_query(db=db, item=item)
+        data = search_evstation_query(db=db, item=item)
   
     for i in data:
         r = {}
@@ -80,6 +80,7 @@ def search_evstation_seq(stat_id: str) -> dict:
     """
     with db_session(DATABASES) as db:
         results = search_evstation_seq_query(db=db, stat_id=stat_id)
+        
     if not results:
         return not_found_error(f'No results staId = "{stat_id}"')
 
@@ -112,11 +113,10 @@ def recommend_evstation() -> dict:
     if errors:
         return bad_request_error(errors)
     
-
     route = item.get('route') if item.get('route') else None
     distance = item.get('distance') if item.get('distance') else 10 # km
-
     routes = list(set([tuple(r) for r in route])) # 중복제거
+
     with db_session(DATABASES) as db:
         results = recommend_evstation_query(db, routes, distance)
     
@@ -141,6 +141,7 @@ def recommend_evstation() -> dict:
 def get_search_filter() -> dict:
     with db_session(DATABASES) as db:
         results = get_search_filter_query(db=db)
+
     return Response(
         body=results,
         headers=HEADERS,
@@ -158,13 +159,13 @@ def get_autocomplete() -> dict:
     errors = evsearch_autocomplete_scheme.validate(params)
     if errors:
         return bad_request_error(errors)
+
     keyword = params.get('statNm')
     offset = params.get('offset') if params.get('offset') else 0
     limit = params.get('limit') if params.get('limit') else 10
+
     with db_session(DATABASES) as db:
         results = get_autocomplete_query(db, keyword=keyword, offset=offset, limit=limit)
-    
-    
     
     body = create_response(
         data=results, 

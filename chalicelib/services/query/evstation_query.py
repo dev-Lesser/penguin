@@ -17,22 +17,22 @@ def search_evstation_query(db, item) -> list:
         EvStationStatusTable.statUpdDt,
         EvStationStatusTable.stat,
         EvStationTable.statNm,
-        func.count(EvStationTable.statId),
+        func.count(EvStationStatusTable.statId),
         EvStationTable.addr,
         EvStationTable.parkingFree,
         EvStationStatusTable.stat,
         EvStationTable.method,
         EvStationTable.output
     )\
+    .group_by(EvStationTable.statId,EvStationTable.chgerId)\
     .join(EvStationStatusTable, EvStationTable.statId==EvStationStatusTable.statId)\
     .filter(
         EvStationTable.lat.between(item.get('minx'), item.get('maxx')) # latitude
     )\
     .filter(
         EvStationTable.lng.between(item.get('miny'), item.get('maxy')) # longitude
-    )\
-    .group_by(EvStationTable.statId)
-
+    )
+    
     filters = {key: val for key, val in item.items() if key not in ['minx','miny','maxx','maxy', 'currentXY']}
     current_xy= item.get('currentXY')
 

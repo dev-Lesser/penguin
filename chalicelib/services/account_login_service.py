@@ -60,7 +60,7 @@ def get_user_info() -> list:
     user_id = params.get('id')
     kind = params.get('kind')
     with db_session(DATABASES) as db:
-        results= get_user_info_query(db, user_id, kind)
+        results = get_user_info_query(db, user_id, kind)
 
     if not results:
         return not_found_error(f'No results user id = "{user_id}", kind = "{kind}"')

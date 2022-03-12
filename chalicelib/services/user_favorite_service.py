@@ -4,11 +4,8 @@ from chalice import Blueprint, Response
 from chalicelib.constants.configs import HEADERS, CORS_CONFIG
 
 from chalicelib.schemes.user_favorite_scheme import UserFavoriteScheme
-
 from chalicelib.utils.db import db_session, DATABASES
-
 from chalicelib.services.query.user_favorite_query import *
-
 from chalicelib.errors.bad_request_error import bad_request_error # 400
 from chalicelib.errors.not_found_error import not_found_error # 404
 
@@ -31,7 +28,7 @@ def handle_favorites() -> dict:
     e = user_favorite_route.current_request.to_dict()
     params = e.get('query_params')
     with db_session(DATABASES) as db:
-        if user_favorite_route.current_request.method == 'GET':
+        if e.get('method') == 'GET':
             user_id = params.get('id')
             success, evtable_results, user_favorite_results = get_favorites_query(db, user_id)
             if not success:
@@ -46,7 +43,7 @@ def handle_favorites() -> dict:
                 status_code=200
             )
 
-        elif user_favorite_route.current_request.method == 'DELETE':
+        elif e.get('method') == 'DELETE':
             errors = user_fav_scheme.validate(params)
             if errors:
                 return bad_request_error(errors)
@@ -64,7 +61,7 @@ def handle_favorites() -> dict:
                 )
 
         
-        elif user_favorite_route.current_request.method == 'POST':
+        elif e.get('method') == 'POST':
             item = json.loads(user_favorite_route.current_request.raw_body.decode())
             errors = user_fav_scheme.validate(item)
             if errors:

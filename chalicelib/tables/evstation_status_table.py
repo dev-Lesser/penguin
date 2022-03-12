@@ -17,6 +17,9 @@ class EvStationStatusTable(BASE):
     lastTsdt    = Column(String(20))
     lastTedt    = Column(String(20))
     nowTsdt     = Column(String(20))
-        
+    chargeFree  = Column(String(2))
     def as_dict(self):
        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+# forcasting horizon
+# train y true, forecasting y hat
+# nan value
