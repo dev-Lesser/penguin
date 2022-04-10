@@ -1,4 +1,6 @@
 import os
+from contextlib import contextmanager
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -20,13 +22,13 @@ DATABASES = 'mysql://%s:%s@%s/%s?charset=utf8' % (
 ENGINE = create_engine(
     DATABASES,
     encoding="utf-8",
-    echo=False,
+    echo=True,
 )
 
 BASE = declarative_base()
 
 
-def create_db_engine(db_conn_string, debug_mode=False):
+def create_db_engine(db_conn_string, debug_mode=True):
     return create_engine(
         db_conn_string,
         echo=debug_mode,
@@ -45,7 +47,14 @@ def create_db_session(engine):
     )
     return session()
 
+
+@contextmanager
 def db_session(engine):
     engine = create_db_engine(db_conn_string = DATABASES)
     db = create_db_session(engine)
-    return db
+    try:
+        yield db
+    except:
+        db.rollback()
+    finally:
+        db.close()

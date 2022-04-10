@@ -14,7 +14,7 @@ from chalicelib.services.query.account_login_query import *
 from chalicelib.errors.bad_request_error import bad_request_error # 400
 from chalicelib.errors.not_found_error import not_found_error # 404
 
-db = db_session(DATABASES)
+# db = db_session(DATABASES)
 
 account_scheme = UserInfoScheme()
 account_check_scheme = GetUserInfoScheme()
@@ -36,8 +36,8 @@ def check_user_info() -> list:
     user_id = item.get('id')
     token = item.get('token')
     kind = item.get('kind')
-
-    results = check_user_info_query(db, user_id, token, kind)
+    with db_session(DATABASES) as db:
+        results = check_user_info_query(db, user_id, token, kind)
     
     return Response(
         body=results,
@@ -59,7 +59,8 @@ def get_user_info() -> list:
     
     user_id = params.get('id')
     kind = params.get('kind')
-    results= get_user_info_query(db, user_id, kind)
+    with db_session(DATABASES) as db:
+        results= get_user_info_query(db, user_id, kind)
 
     if not results:
         return not_found_error(f'No results user id = "{user_id}", kind = "{kind}"')

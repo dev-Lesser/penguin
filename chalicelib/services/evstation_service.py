@@ -18,7 +18,7 @@ from chalicelib.services.query.evstation_query import *
 from chalicelib.errors.bad_request_error import bad_request_error # 400
 from chalicelib.errors.not_found_error import not_found_error # 404
 
-db = db_session(DATABASES)
+# db = db_session(DATABASES)
 
 evstation_service_route = Blueprint(__name__)
 
@@ -41,7 +41,8 @@ def search_evstation() -> dict:
     if errors:
         return bad_request_error(errors)
     results = []
-    data =  search_evstation_query(db=db, item=item)
+    with db_session(DATABASES) as db:
+        data =  search_evstation_query(db=db, item=item)
   
     for i in data:
         r = {}
@@ -72,10 +73,11 @@ def search_evstation_seq(stat_id: str) -> dict:
     """
     statId 를 통한 충전소 검색
     """
-
-    results = search_evstation_seq_query(db=db, stat_id=stat_id)
+    with db_session(DATABASES) as db:
+        results = search_evstation_seq_query(db=db, stat_id=stat_id)
     if not results:
         return not_found_error(f'No results staId = "{stat_id}"')
+
     body = create_response(
         data=results, 
         metadata=[
@@ -110,7 +112,8 @@ def recommend_evstation() -> dict:
     distance = item.get('distance') if item.get('distance') else 10 # km
 
     routes = list(set([tuple(r) for r in route])) # 중복제거
-    results = recommend_evstation_query(db, routes, distance)
+    with db_session(DATABASES) as db:
+        results = recommend_evstation_query(db, routes, distance)
     
     body = create_response(
         data=results, 
@@ -131,7 +134,8 @@ def recommend_evstation() -> dict:
     cors = DEV_CORS_CONFIG, 
 )
 def get_search_filter() -> dict:
-    results = get_search_filter_query(db=db)
+    with db_session(DATABASES) as db:
+        results = get_search_filter_query(db=db)
     return Response(
         body=results,
         headers=DEV_HEADERS,
@@ -152,8 +156,8 @@ def get_autocomplete() -> dict:
     keyword = params.get('statNm')
     offset = params.get('offset') if params.get('offset') else 0
     limit = params.get('limit') if params.get('limit') else 10
-
-    results = get_autocomplete_query(db, keyword=keyword, offset=offset, limit=limit)
+    with db_session(DATABASES) as db:
+        results = get_autocomplete_query(db, keyword=keyword, offset=offset, limit=limit)
     
     
     
