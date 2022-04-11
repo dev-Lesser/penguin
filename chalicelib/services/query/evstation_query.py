@@ -55,7 +55,7 @@ def search_evstation_query_filter_builder(data, filters: dict):
                 max_output, min_output = max(ft), min(ft)
                 filter_query.append(between(getattr(EvStationTable, key), min_output, max_output))    
                 break # where between 2번 중복 방지
-            elif key == 'parkingFree':
+            elif key == 'parkingFree' or key == 'limitYn':
                 filter_query.append(and_(getattr(EvStationTable, key) == value))
             else: 
                 filter_query.append(or_(getattr(EvStationTable, key) == value))
