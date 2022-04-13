@@ -1,5 +1,5 @@
 import json
-from sqlalchemy import func, or_, and_
+from sqlalchemy import func, or_, and_, between
 from chalicelib.constants.configs import KILOMETER
 from chalicelib.tables.evstation_table import EvStationTable
 from chalicelib.utils.utils import AlchemyEncoder
@@ -21,7 +21,8 @@ def search_evstation_query(db, item) -> list:
         EvStationTable.addr,
         EvStationTable.parkingFree,
         EvStationStatusTable.stat,
-        EvStationTable.method
+        EvStationTable.method,
+        EvStationTable.output
     )\
     .join(EvStationStatusTable, EvStationTable.statId==EvStationStatusTable.statId)\
     .filter(
@@ -46,12 +47,18 @@ def search_evstation_query(db, item) -> list:
 
 
 def search_evstation_query_filter_builder(data, filters: dict):
-    filter_query = []
     for key, ft in filters.items():
-        if key == 'stat':
-            filter_query.append(getattr(EvStationStatusTable, key) == ft)
-        else: filter_query.append(getattr(EvStationTable, key) == ft)
-    data = data.filter(and_(*filter_query))
+        filter_query = []
+        for value in ft:
+            if key == 'stat':
+                filter_query.append(or_(getattr(EvStationStatusTable, key) == value))
+            elif key == 'output': # 충전용량 min max
+                filter_query.append(between(getattr(EvStationTable, key), ft[0], ft[1])) # where between 2번 중복
+            elif key == 'parkingFree':
+                filter_query.append(and_(getattr(EvStationTable, key) == value))
+            else: 
+                filter_query.append(or_(getattr(EvStationTable, key) == value))
+        data = data.filter(or_(*filter_query))
 
     return data
 

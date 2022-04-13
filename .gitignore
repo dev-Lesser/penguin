@@ -5,3 +5,4 @@ smartcharging_auth.json
 .chalice/config.json
 *.ipynb
 __pycache__
+.ipynb_checkpoints
