@@ -130,9 +130,9 @@ def recommend_evstation() -> dict:
     cors = DEV_CORS_CONFIG, 
 )
 def get_search_filter() -> dict:
-    
+    results = get_search_filter_query(db=db)
     return Response(
-        body='',
+        body=results,
         headers=DEV_HEADERS,
         status_code=200
     )

@@ -25,10 +25,10 @@ class EvStationTable(BASE):
     zcode       = Column(String(10))
     parkingFree = Column(String(20))
     note        = Column(String(10))
-    limitYn     = Column(String(5))
-    limitDetail = Column(String(200))
-    delYn       = Column(String(5))
-    delDetail   = Column(String(200))
+    # limitYn     = Column(String(5))
+    # limitDetail = Column(String(200))
+    # delYn       = Column(String(5))
+    # delDetail   = Column(String(200))
     
     def __init__(self, seq, statNm, statId, chgerId, chgerType, stat, addr, location,
         lat, lng, useTime, busiId, bnm, busiNm, busiCall, output, method,

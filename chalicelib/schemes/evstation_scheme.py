@@ -28,7 +28,6 @@ class EvSearchScheme(Schema):
     zcode       = fields.String(required=False,     validate=validate.Length(equal=2)) # 법정 코드
     parkingFree = fields.String(required=False,     validate=validate.ContainsOnly(choices=['Y','N']))
     bnm         = fields.String(required=False)
-    busiNm      = fields.String(required=False)
 
     def as_dict(self):
        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
