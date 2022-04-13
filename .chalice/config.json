@@ -1,0 +1,32 @@
+{
+  "version": "2.0",
+  "app_name": "penguin",
+  "stages": {
+    "dev": {
+      "api_gateway_stage": "dev",
+        "environment_variables": {
+          "USER_NAME": "root",
+          "USER_PASSWORD": "evcharge900!",
+          "DB_HOST": "0.tcp.ap.ngrok.io:15080",
+          "DB_NAME": "evcharge-dev",
+          "FIREBASE_AUTH_PATH" : "chalicelib/constants/smartcharging_auth.json",
+          "EV_SERVICE_KEY" : "77OEmsrVabw1k+AvZZdONCkA5glvTXiNLRuSg45bQsft1+611wIDgmnTNMnSMhZLi5xKcA16bfs37pTVHfItRA=="
+        }
+    },
+    "stage": {
+      "api_gateway_stage": "stage"
+    },
+    "prod": {
+      "api_gateway_stage": "api",
+
+      "environment_variables": {
+        "USER_NAME": "ev_dev",
+        "USER_PASSWORD": "evdev800!",
+        "DB_HOST": "0.tcp.ap.ngrok.io:15080",
+        "DB_NAME": "evcharge",
+        "FIREBASE_AUTH_PATH" : "chalicelib/constants/smartcharging_auth.json",
+        "EV_SERVICE_KEY" : "77OEmsrVabw1k+AvZZdONCkA5glvTXiNLRuSg45bQsft1+611wIDgmnTNMnSMhZLi5xKcA16bfs37pTVHfItRA=="
+      }
+    }
+  }
+}

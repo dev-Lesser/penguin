@@ -1,0 +1,6 @@
+.chalice/deployments/
+.chalice/venv/
+smartcharging_auth.json
+.pytest_cache
+.chalice/config.json
+*.ipynb
