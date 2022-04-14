@@ -7,4 +7,4 @@ smartcharging_auth.json
 __pycache__
 .ipynb_checkpoints
 *.pyc
-config.json
+.chalice/config.json
