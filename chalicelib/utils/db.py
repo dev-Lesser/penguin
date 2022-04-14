@@ -27,13 +27,16 @@ BASE = declarative_base()
 
 
 def create_db_engine(db_conn_string, debug_mode=False):
-    return create_engine(db_conn_string,
-                         echo=debug_mode,
-                         pool_size=10,
-                         max_overflow=0,
-                         pool_recycle=50,
-                         pool_pre_ping=True,
-                         pool_use_lifo=True)
+    return create_engine(
+        db_conn_string,
+        echo=debug_mode,
+        pool_size=10,
+        max_overflow=0,
+        pool_recycle=3600,
+        pool_pre_ping=True,
+        pool_use_lifo=True,
+        encoding="utf-8"
+    )
 
 
 def create_db_session(engine):

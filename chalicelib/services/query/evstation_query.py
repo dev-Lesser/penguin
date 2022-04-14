@@ -1,5 +1,5 @@
 import json
-from sqlalchemy import func, or_, and_
+from sqlalchemy import func, or_, and_, between
 from chalicelib.constants.configs import KILOMETER
 from chalicelib.tables.evstation_table import EvStationTable
 from chalicelib.utils.utils import AlchemyEncoder
@@ -21,7 +21,8 @@ def search_evstation_query(db, item) -> list:
         EvStationTable.addr,
         EvStationTable.parkingFree,
         EvStationStatusTable.stat,
-        EvStationTable.method
+        EvStationTable.method,
+        EvStationTable.output
     )\
     .join(EvStationStatusTable, EvStationTable.statId==EvStationStatusTable.statId)\
     .filter(
@@ -46,12 +47,19 @@ def search_evstation_query(db, item) -> list:
 
 
 def search_evstation_query_filter_builder(data, filters: dict):
-    filter_query = []
     for key, ft in filters.items():
-        if key == 'stat':
-            filter_query.append(getattr(EvStationStatusTable, key) == ft)
-        else: filter_query.append(getattr(EvStationTable, key) == ft)
-    data = data.filter(and_(*filter_query))
+        filter_query = []
+        # [TODO] filter 생성 효율화
+        for value in ft:
+            if key == 'output': # 충전용량 min max
+                max_output, min_output = max(ft), min(ft)
+                filter_query.append(between(getattr(EvStationTable, key), min_output, max_output))    
+                break # where between 2번 중복 방지
+            elif key == 'parkingFree':
+                filter_query.append(and_(getattr(EvStationTable, key) == value))
+            else: 
+                filter_query.append(or_(getattr(EvStationTable, key) == value))
+        data = data.filter(or_(*filter_query))
 
     return data
 
@@ -68,12 +76,15 @@ def recommend_evstation_query_builder(routes: list, distance) -> or_:
     route_filters = []
     for route in routes:
         route_filters.append(
-            (func.degrees(
-                func.acos(
-                    func.sin(func.radians(EvStationTable.lat)) * func.sin(func.radians(route[0])) + 
-                    func.cos(func.radians(EvStationTable.lat)) * func.cos(func.radians(route[0])) * 
-                    func.cos(func.radians(EvStationTable.lng - route[1]))
-                )) * KILOMETER) < distance
+            (
+                func.degrees(
+                    func.acos(
+                        func.sin(func.radians(EvStationTable.lat)) * func.sin(func.radians(route[0])) + 
+                        func.cos(func.radians(EvStationTable.lat)) * func.cos(func.radians(route[0])) * 
+                        func.cos(func.radians(EvStationTable.lng - route[1]))
+                    )
+                ) * KILOMETER
+            ) < distance
         )
     return or_(*route_filters)
 
@@ -91,9 +102,10 @@ def get_search_filter_query(db) -> dict:
     filters = {}
     for i in data:
         item = i.as_dict()
-        if item.get('from_column') not in filters.keys():
-            filters[item.get('from_column')] = [{'filter': item.get('name'), 'desc': item.get('info')}]
-        else:
-            filters[item.get('from_column')].append({'filter': item.get('name'), 'desc': item.get('info')})
+        filters.setdefault(item.get('from_column'), [])
+        filters[item.get('from_column')].append({
+            'filter': item.get('name'), 
+            'desc': item.get('info')
+            })
     
     return filters
