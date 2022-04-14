@@ -25,7 +25,7 @@ class EvStationTable(BASE):
     zcode       = Column(String(10))
     parkingFree = Column(String(20))
     note        = Column(String(10))
-    # limitYn     = Column(String(5))
+    limitYn     = Column(String(1))
     # limitDetail = Column(String(200))
     # delYn       = Column(String(5))
     # delDetail   = Column(String(200))

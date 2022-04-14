@@ -46,6 +46,14 @@ class EvSearchScheme(Schema):
     zcode       = fields.List(fields.String(required=False,     validate=validate.Length(equal=2)), validate=validate.Length(max=3)) # 법정 코드
     parkingFree = fields.String(required=False,  validate=validate.ContainsOnly(choices=['Y','N']))
     busiId      = fields.List(fields.String(required=False), validate=validate.Length(max=3))
+    limitYn     = fields.String(required=False,  validate=validate.ContainsOnly(choices=['Y','N']))
+    def as_dict(self):
+       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
+
+class AutoCompleteScheme(Schema):
+    statNm = fields.String(required=True, validate=validate.Length(min=2))
+    offset = fields.Integer(required=False)
+    limit = fields.Integer(required=False, validate=validate.Range(max=100, error="Value must be lower than 100"))
     def as_dict(self):
        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
