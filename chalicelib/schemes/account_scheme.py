@@ -6,10 +6,10 @@ from marshmallow import Schema, fields
 
 class UserInfoScheme(Schema):
     id          = fields.Email(required=True)
-    kind        = fields.Str(required=True)
-    token       = fields.Str(required=True)
-    fmtoken     = fields.Str(required=False)
+    kind        = fields.String(required=True)
+    token       = fields.String(required=True)
+    fmtoken     = fields.String(required=False)
 
 class GetUserInfoScheme(Schema):
     id      = fields.Email(required=True)
-    kind    = fields.Str(required=True)
+    kind    = fields.String(required=True)
