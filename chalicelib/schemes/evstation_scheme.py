@@ -49,3 +49,11 @@ class EvSearchScheme(Schema):
 
     def as_dict(self):
        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+
+class AutoCompleteScheme(Schema):
+    statNm = fields.String(required=True, validate=validate.Length(min=2))
+    offset = fields.Integer(required=False)
+    limit = fields.Integer(required=False, validate=validate.Range(max=100, error="Value must be lower than 100"))
+    def as_dict(self):
+       return {c.name: getattr(self, c.name) for c in self.__table__.columns}

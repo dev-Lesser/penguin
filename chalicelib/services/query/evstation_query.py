@@ -109,3 +109,12 @@ def get_search_filter_query(db) -> dict:
             })
     
     return filters
+
+
+def get_autocomplete_query(db, keyword: str, offset: int, limit: int) -> dict:
+    keyword = "%{}%".format(keyword)
+    data = db.query(EvStationTable.statNm).distinct(EvStationTable.statNm)\
+        .filter(EvStationTable.statNm.like(keyword)).offset(offset).limit(limit).all()
+    
+    results = [i[0] for i in data]
+    return results

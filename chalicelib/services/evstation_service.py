@@ -7,7 +7,7 @@ recommend_evstation [post] -> 위경도 list 묶음, distance default 10
 import json
 
 from chalice import Blueprint, Response
-from chalicelib.schemes.evstation_scheme import EvSearchScheme, EvRecommendScheme
+from chalicelib.schemes.evstation_scheme import EvSearchScheme, EvRecommendScheme, AutoCompleteScheme
 from chalicelib.constants.configs import DEV_CORS_CONFIG, DEV_HEADERS, EVSTATION_COLUMNS
 
 from chalicelib.utils.utils import create_response
@@ -25,6 +25,7 @@ evstation_service_route = Blueprint(__name__)
 # Load schemes
 evsearch_scheme = EvSearchScheme()
 evrecommend_scheme = EvRecommendScheme()
+evsearch_autocomplete_scheme = AutoCompleteScheme()
 
 @evstation_service_route.route(
     path = '/search/evstation', 
@@ -133,6 +134,38 @@ def get_search_filter() -> dict:
     results = get_search_filter_query(db=db)
     return Response(
         body=results,
+        headers=DEV_HEADERS,
+        status_code=200
+    )
+
+@evstation_service_route.route(
+    path = '/search/autocomplete', 
+    methods = ['GET'],
+    cors = DEV_CORS_CONFIG, 
+)
+def get_autocomplete() -> dict:
+    e = evstation_service_route.current_request.to_dict()
+    params = e.get('query_params')
+    errors = evsearch_autocomplete_scheme.validate(params)
+    if errors:
+        return bad_request_error(errors)
+    keyword = params.get('statNm')
+    offset = params.get('offset') if params.get('offset') else 0
+    limit = params.get('limit') if params.get('limit') else 10
+
+    results = get_autocomplete_query(db, keyword=keyword, offset=offset, limit=limit)
+    
+    
+    
+    body = create_response(
+        data=results, 
+        metadata=[
+            {'name': 'keyword', 'value': keyword},
+        ]
+    )
+    
+    return Response(
+        body=body,
         headers=DEV_HEADERS,
         status_code=200
     )
