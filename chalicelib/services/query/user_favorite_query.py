@@ -1,3 +1,4 @@
+from chalicelib.tables.account_table import UserInfoTable
 from chalicelib.tables.evstation_table import EvStationTable
 from chalicelib.tables.user_favorite_table import UserFavoriteTable
 from sqlalchemy.exc import IntegrityError
@@ -6,6 +7,9 @@ def get_favorites_query(db, user_id) -> tuple:
     """
     user_info JOIN evtable
     """
+    check_user = db.query(UserInfoTable).filter(UserInfoTable.id == user_id).first()
+    if not check_user:
+        return (False, False, False)
     data = db.query(EvStationTable, UserFavoriteTable)\
         .filter(UserFavoriteTable.id == user_id)\
         .join(EvStationTable, UserFavoriteTable.statId==EvStationTable.statId).all()
@@ -15,7 +19,7 @@ def get_favorites_query(db, user_id) -> tuple:
 
     user_favorite_results = list(map(dict, set(tuple(sorted(d.items())) for d in user_favorite_results)))
 
-    return (evtable_results, user_favorite_results)
+    return (True, evtable_results, user_favorite_results)
 
 def delete_favorites_query(db, user_id, stat_id) -> int:
     try:
