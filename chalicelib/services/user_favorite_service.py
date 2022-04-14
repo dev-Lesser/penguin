@@ -32,8 +32,9 @@ def handle_favorites() -> dict:
 
     if user_favorite_route.current_request.method == 'GET':
         user_id = params.get('id')
-        evtable_results, user_favorite_results = get_favorites_query(db, user_id)
-        
+        success, evtable_results, user_favorite_results = get_favorites_query(db, user_id)
+        if not success:
+            return bad_request_error(f'There is no user id = {user_id}')
         results = {
             'evstation': evtable_results,
             'userInfo': user_favorite_results
