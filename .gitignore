@@ -6,3 +6,4 @@ smartcharging_auth.json
 *.ipynb
 __pycache__
 .ipynb_checkpoints
+*.pyc
