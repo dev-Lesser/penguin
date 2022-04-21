@@ -29,14 +29,14 @@ def search_evstation_query(db, item) -> list:
         EvStationTable.method,
         EvStationTable.output
     )\
-    .join(EvStationTable, EvStationTable.statId==EvStationStatusTable.statId)\
-    .group_by(EvStationStatusTable.statId)\
+    .join(EvStationStatusTable, (EvStationTable.statId==EvStationStatusTable.statId)
+        &(EvStationTable.chgerId==EvStationStatusTable.chgerId))\
     .filter(
         EvStationTable.lat.between(item.get('minx'), item.get('maxx')) # latitude
     )\
     .filter(
         EvStationTable.lng.between(item.get('miny'), item.get('maxy')) # longitude
-    )
+    ).group_by(EvStationStatusTable.statId)
     
     # 
     filters = {key: val for key, val in item.items() if key not in ['minx','miny','maxx','maxy', 'currentXY', 'order']}
@@ -48,11 +48,13 @@ def search_evstation_query(db, item) -> list:
     if current_xy:
         data = data.order_by(func.pow(
                 (EvStationTable.lng - current_xy[1]),2) + func.pow((EvStationTable.lat-current_xy[0]),2)\
-                .asc()).all()
+                .asc())
         results = list()
         if item.get('order') == 'T':
+            data = data.offset(0).limit(5).all()
             results = search_evstation_query_order_builder(data, current_xy)
         else:
+            data = data.all()
             for i in data:
                 r = {}
                 for idx, column_name in enumerate(EVSTATION_COLUMNS):
