@@ -50,7 +50,8 @@ class EvSearchScheme(Schema):
     
     # Ordering
     order       = fields.String(required=False, validate=validate.ContainsOnly(choices=['D','T']))
-
+    offset      = fields.Integer(required=False)
+    limit       = fields.Integer(required=False, validate=validate.Range(min=1, max=5))
     def as_dict(self):
        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 

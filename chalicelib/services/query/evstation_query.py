@@ -29,17 +29,18 @@ def search_evstation_query(db, item) -> list:
         EvStationTable.method,
         EvStationTable.output
     )\
-    .join(EvStationStatusTable, (EvStationTable.statId==EvStationStatusTable.statId)
+    .join(EvStationStatusTable, 
+        (EvStationTable.statId==EvStationStatusTable.statId)
         &(EvStationTable.chgerId==EvStationStatusTable.chgerId))\
     .filter(
         EvStationTable.lat.between(item.get('minx'), item.get('maxx')) # latitude
+        &  EvStationTable.lng.between(item.get('miny'), item.get('maxy'))# longitude
     )\
-    .filter(
-        EvStationTable.lng.between(item.get('miny'), item.get('maxy')) # longitude
-    ).group_by(EvStationStatusTable.statId)
+    .group_by(EvStationStatusTable.statId)
     
     # 
-    filters = {key: val for key, val in item.items() if key not in ['minx','miny','maxx','maxy', 'currentXY', 'order']}
+    filters = {key: val for key, val in item.items() if key not in ['minx','miny','maxx','maxy', 
+                                                                    'currentXY', 'order', 'offset','limit']}
     current_xy= item.get('currentXY')
 
     if filters:
@@ -51,17 +52,21 @@ def search_evstation_query(db, item) -> list:
                 .asc())
         results = list()
         if item.get('order') == 'T':
-            data = data.offset(0).limit(5).all()
+            # time 기준 ordering 일 때 pagination 으로 받아옴
+            offset = item.get('offset') if item.get('offset') else 0
+            limit = item.get('limit') if item.get('limit') else 5
+            data = data.offset(offset).limit(limit).all() 
             results = search_evstation_query_order_builder(data, current_xy)
         else:
-            data = data.all()
+            # distance 기준 ordering 일때 그냥 all 로 리스트를 받아옴
+            data = data.all() 
             for i in data:
                 r = {}
                 for idx, column_name in enumerate(EVSTATION_COLUMNS):
                     r[column_name] = i[idx]
                 results.append(r)
 
-    return results # -> [TODO] dict 으로 바꿔야함
+    return results 
 
 def get_time_from_naver_map(result, current_xy, current_time, durations):
 
