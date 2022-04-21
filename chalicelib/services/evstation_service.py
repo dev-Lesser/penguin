@@ -47,16 +47,8 @@ def search_evstation() -> dict:
         return bad_request_error(errors)
     results = []
     with db_session(DATABASES) as db:
-        data = search_evstation_query(db=db, item=item)
-  
-    for i in data:
-        r = {}
-        for idx, column_name in enumerate(EVSTATION_COLUMNS):
-            r[column_name] = i[idx]
-
-      
-        results.append(r)
-
+        results = search_evstation_query(db=db, item=item)
+    
     body = create_response(
         data=results, 
         metadata=[
@@ -80,7 +72,7 @@ def search_evstation_seq(stat_id: str) -> dict:
     """
     with db_session(DATABASES) as db:
         results = search_evstation_seq_query(db=db, stat_id=stat_id)
-        
+
     if not results:
         return not_found_error(f'No results staId = "{stat_id}"')
 

@@ -48,7 +48,9 @@ class EvSearchScheme(Schema):
     busiId      = fields.List(fields.String(required=False), validate=validate.Length(max=3))
     limitYn     = fields.String(required=False,  validate=validate.ContainsOnly(choices=['Y','N']))
     
-    
+    # Ordering
+    order       = fields.String(required=False, validate=validate.ContainsOnly(choices=['D','T']))
+
     def as_dict(self):
        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 

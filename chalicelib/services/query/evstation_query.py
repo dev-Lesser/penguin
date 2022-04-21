@@ -1,6 +1,11 @@
+import os
 import json
+import time
 from sqlalchemy import func, or_, and_, between
-from chalicelib.constants.configs import KILOMETER
+from multiprocessing import Manager, Process
+
+import requests
+from chalicelib.constants.configs import KILOMETER, EVSTATION_COLUMNS
 from chalicelib.tables.evstation_table import EvStationTable
 from chalicelib.utils.utils import AlchemyEncoder
 from chalicelib.tables.evstation_status_table import EvStationStatusTable
@@ -24,8 +29,8 @@ def search_evstation_query(db, item) -> list:
         EvStationTable.method,
         EvStationTable.output
     )\
-    .group_by(EvStationTable.statId,EvStationTable.chgerId)\
-    .join(EvStationStatusTable, EvStationTable.statId==EvStationStatusTable.statId)\
+    .join(EvStationTable, EvStationTable.statId==EvStationStatusTable.statId)\
+    .group_by(EvStationStatusTable.statId)\
     .filter(
         EvStationTable.lat.between(item.get('minx'), item.get('maxx')) # latitude
     )\
@@ -33,23 +38,79 @@ def search_evstation_query(db, item) -> list:
         EvStationTable.lng.between(item.get('miny'), item.get('maxy')) # longitude
     )
     
-    filters = {key: val for key, val in item.items() if key not in ['minx','miny','maxx','maxy', 'currentXY']}
+    # 
+    filters = {key: val for key, val in item.items() if key not in ['minx','miny','maxx','maxy', 'currentXY', 'order']}
     current_xy= item.get('currentXY')
 
     if filters:
         data = search_evstation_query_filter_builder(data, filters)
     
     if current_xy:
-        data = data.order_by(func.pow((EvStationTable.lng - current_xy[1]),2) + func.pow((EvStationTable.lat-current_xy[0]),2).asc())
-  
+        data = data.order_by(func.pow(
+                (EvStationTable.lng - current_xy[1]),2) + func.pow((EvStationTable.lat-current_xy[0]),2)\
+                .asc()).all()
+        results = list()
+        if item.get('order') == 'T':
+            results = search_evstation_query_order_builder(data, current_xy)
+        else:
+            for i in data:
+                r = {}
+                for idx, column_name in enumerate(EVSTATION_COLUMNS):
+                    r[column_name] = i[idx]
+                results.append(r)
 
-    return data.all()
+    return results # -> [TODO] dict 으로 바꿔야함
+
+def get_time_from_naver_map(result, current_xy, current_time, durations):
+
+    lat, lng = result[:2]
+
+    params = {
+        'start': f'{current_xy[1]},{current_xy[0]}',
+        'goal': f'{lng},{lat}',
+        'departureTime': current_time,
+        'mode': 'TIME',
+        'lang': 'ko',
+    }
+    url = os.environ['NAVER_MAP_URL']
+    res = requests.get(url, params=params)
+
+    if not res.json()['paths']:
+        duration = 0
+    else:
+        duration = res.json()['paths'][0]['duration'] # 첫번째 최적경로
+    result_item = {'duration': duration}
+
+    for key, value in zip(EVSTATION_COLUMNS, result):
+        result_item[key] = value
+
+
+    durations.append(result_item)
+
+
+def search_evstation_query_order_builder(data, current_xy):
+    results = data
+    current_time = time.strftime('%Y-%m-%dT%H:%M:%S', time.localtime(time.time()))
+
+    processes = []
+    durations = Manager().list()
+
+    for res in results:
+        process = Process(target=get_time_from_naver_map, args=(res, current_xy, current_time, durations))
+        processes.append(process)
+    for process in processes:
+        process.start()
+    for process in processes:
+        process.join()
+
+    results = [v for v in sorted(durations, key=lambda x : x['duration'])]
+
+    return results
 
 
 def search_evstation_query_filter_builder(data, filters: dict):
     for key, ft in filters.items():
         filter_query = []
-        # [TODO] filter 생성 효율화
         for value in ft:
             if key == 'output': # 충전용량 min max
                 max_output, min_output = max(ft), min(ft)

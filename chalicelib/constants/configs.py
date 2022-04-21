@@ -11,7 +11,7 @@ CORS_CONFIG = CORSConfig(
     allow_origin=os.environ['ALLOW_ORIGIN'],
     allow_credentials=True
 )
-EVSTATION_COLUMNS = ["lat","lng", "busiId", "businNm","statId", "chgerType", 
-    "statUpdDt" ,"stat", "statNm", "count", "addr", "parkingFree" ,"stat", 'method', 'output']
+EVSTATION_COLUMNS = ['lat','lng', 'busiId', 'businNm','statId', 'chgerType', 
+    'statUpdDt' ,'stat', 'statNm', 'count', 'addr', 'parkingFree' ,'stat', 'method', 'output']
 
 KILOMETER = 60 * 1.1515 * 1.609344

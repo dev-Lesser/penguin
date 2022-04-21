@@ -23,7 +23,7 @@ DATABASES = 'mysql://%s:%s@%s/%s?charset=utf8' % (
 BASE = declarative_base()
 
 
-def create_db_engine(db_conn_string, debug_mode=False):
+def create_db_engine(db_conn_string, debug_mode=True):
     return create_engine(
         db_conn_string,
         echo=debug_mode,
@@ -38,7 +38,7 @@ def create_db_engine(db_conn_string, debug_mode=False):
 
 def create_db_session(engine):
     session = scoped_session(
-        sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        sessionmaker(autocommit=False, autoflush=True, bind=engine)
     )
     return session()
 
@@ -49,7 +49,7 @@ def db_session(engine):
     db = create_db_session(engine)
     try:
         yield db
-    except:
+    except Exception as ex:
         db.rollback()
         print('db connection rollback')
     finally:
