@@ -17,7 +17,8 @@ db = db_session(DATABASES)
 data_pipeline_route = Blueprint(__name__)
 
 #[TODO] Code convention
-# Database update station_status
+# 1. evtable update, multiprocessing
+# 2. station_status update
 @data_pipeline_route.schedule('rate(1 hour)')
 def upsert_station_status():
     output = {}

@@ -34,7 +34,7 @@ def search_evstation_query(db, item) -> list:
         &(EvStationTable.chgerId==EvStationStatusTable.chgerId))\
     .filter(
         EvStationTable.lat.between(item.get('minx'), item.get('maxx')) # latitude
-        &  EvStationTable.lng.between(item.get('miny'), item.get('maxy'))# longitude
+        & EvStationTable.lng.between(item.get('miny'), item.get('maxy'))# longitude
     )\
     .group_by(EvStationStatusTable.statId)
     
@@ -69,9 +69,7 @@ def search_evstation_query(db, item) -> list:
     return results 
 
 def get_time_from_naver_map(result, current_xy, current_time, durations):
-
     lat, lng = result[:2]
-
     params = {
         'start': f'{current_xy[1]},{current_xy[0]}',
         'goal': f'{lng},{lat}',
@@ -86,6 +84,7 @@ def get_time_from_naver_map(result, current_xy, current_time, durations):
         duration = 0
     else:
         duration = res.json()['paths'][0]['duration'] # 첫번째 최적경로
+        
     result_item = {'duration': duration}
 
     for key, value in zip(EVSTATION_COLUMNS, result):
@@ -119,6 +118,7 @@ def search_evstation_query_filter_builder(data, filters: dict):
     for key, ft in filters.items():
         filter_query = []
         for value in ft:
+            # [TODO] 날짜시간 필터
             if key == 'output': # 충전용량 min max
                 max_output, min_output = max(ft), min(ft)
                 filter_query.append(between(getattr(EvStationTable, key), min_output, max_output))    
